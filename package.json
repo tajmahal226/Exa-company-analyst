@@ -1,0 +1,30 @@
+{
+  "name": "exa-company-analyst",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Equity Research Brief — channel-check briefs on any ticker via the Exa Agent API: the read, debates, KPIs, and peer read-throughs with sources.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "api": "tsx src/server/api.ts",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "exa-js": "^2.14.0",
+    "lucide-react": "^0.454.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}

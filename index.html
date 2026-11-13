@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Equity Research Brief — Exa Agent Tool</title>
+    <meta
+      name="description"
+      content="Channel-check brief on any ticker: the read, debates, KPIs, and peer read-throughs with sources — powered by the Exa Agent API."
+    />
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #111831;
+        --panel-2: #17203f;
+        --border: #263055;
+        --text: #e8ecf8;
+        --muted: #9aa7c9;
+        --accent: #6c8cff;
+        --ok: #4ade80;
+        --warn: #fbbf24;
+        --danger: #f87171;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        background: radial-gradient(1200px 600px at 80% -10%, #1a2350 0%, var(--bg) 55%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+      header.top {
+        display: flex; align-items: center; gap: 12px;
+        padding: 18px 24px; border-bottom: 1px solid var(--border);
+      }
+      header.top .brand { font-weight: 700; letter-spacing: 0.2px; }
+      header.top .badge {
+        font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;
+        border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px;
+        color: var(--muted); background: var(--panel);
+      }
+      main { max-width: 1080px; margin: 0 auto; padding: 24px; }
+      .live-box {
+        display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+        background: var(--panel); border: 1px solid var(--border);
+        border-radius: 14px; padding: 14px 16px; margin-bottom: 22px;
+      }
+      .live-box input {
+        flex: 1 1 200px; min-width: 160px;
+        background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+        color: var(--text); padding: 10px 12px; font-size: 15px;
+        font-family: var(--mono); text-transform: uppercase;
+      }
+      .live-box input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+      button {
+        background: var(--accent); color: #0b1020; border: 0; border-radius: 8px;
+        padding: 10px 18px; font-weight: 600; font-size: 14px; cursor: pointer;
+      }
+      button:disabled { opacity: 0.55; cursor: wait; }
+      button.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+      .hint { color: var(--muted); font-size: 12.5px; flex-basis: 100%; }
+      .run-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+      .run-card {
+        background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+        padding: 16px; cursor: pointer; transition: border-color 0.15s, transform 0.1s;
+      }
+      .run-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+      .run-card .ticker {
+        font-family: var(--mono); font-size: 18px; font-weight: 700; letter-spacing: 0.5px;
+      }
+      .run-card .co { color: var(--muted); font-size: 13px; margin-top: 2px; }
+      .run-card .meta { display: flex; justify-content: space-between; margin-top: 12px; color: var(--muted); font-size: 12px; }
+      .status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+      .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+      .status.completed .dot { background: var(--ok); }
+      .status.running .dot, .status.queued .dot { background: var(--warn); }
+      .status.failed .dot { background: var(--danger); }
+      .brief { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px 22px; margin-top: 4px; }
+      .brief h1 { margin: 0 0 2px; font-size: 22px; }
+      .brief .sub { color: var(--muted); margin-bottom: 16px; font-size: 13.5px; }
+      .brief h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin: 22px 0 10px; }
+      .summary { line-height: 1.6; }
+      .debate { border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; background: var(--panel-2); }
+      .debate .q { font-weight: 600; margin-bottom: 8px; }
+      .debate .case { margin: 6px 0; }
+      .debate .case .lbl { font-weight: 700; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.6px; }
+      .debate .case .lbl.bull { color: var(--ok); }
+      .debate .case .lbl.bear { color: var(--danger); }
+      .debate .resolves { color: var(--muted); font-size: 13px; margin-top: 8px; }
+      .debate .resolves b { color: var(--text); }
+      .kpis, .peers, .mgmt { list-style: none; margin: 0; padding: 0; }
+      .kpis li, .peers li, .mgmt li {
+        border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px;
+        background: var(--panel-2);
+      }
+      .kpi-name { font-weight: 700; }
+      .kpi-why { color: var(--muted); font-size: 13.5px; margin-top: 3px; }
+      .peer-head { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+      .dir { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; padding: 2px 8px; border-radius: 999px; border: 1px solid; }
+      .dir.positive { color: var(--ok); border-color: var(--ok); }
+      .dir.negative { color: var(--danger); border-color: var(--danger); }
+      .dir.neutral { color: var(--muted); border-color: var(--border); }
+      .sources { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+      .sources a {
+        color: var(--accent); text-decoration: none; font-size: 12.5px; word-break: break-all;
+      }
+      .sources a:hover { text-decoration: underline; }
+      .src-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); }
+      .mgmt .when { color: var(--muted); font-size: 12.5px; }
+      .error { border: 1px solid var(--danger); color: #ffd9d9; background: #2a1220; border-radius: 10px; padding: 12px 14px; margin: 12px 0; font-size: 13.5px; }
+      .empty { color: var(--muted); text-align: center; padding: 40px 0; }
+      .back { margin-bottom: 14px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
